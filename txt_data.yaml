@@ -1,0 +1,8 @@
+scene_transformation: 1.0 # 进行场景变换
+
+scene_path: 'D:\IROBOT\MyCode\buff\DataEnhance\scene2\'
+
+origin_data_path: 'D:\IROBOT\MyCode\buff\DataEnhance\temp\data\'
+
+save_path: 'D:\IROBOT\MyCode\buff\DataEnhance\temp\data\test\'
+
