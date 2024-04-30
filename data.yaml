@@ -8,13 +8,13 @@ gaussian_rate: 0.01 #产生高斯噪声的概率
 Brighter_rate: 0.02 #使图像增亮
 Blur_rate: 0.01 #进行高斯滤波
 
-is_transform: 0.1 #进行红蓝通道转换
+is_transform: 0 #进行红蓝通道转换
 
 # 图片名 = (scene_)学校名_所在最后一级文件_(convert_)方法_原图片名称.jpg/png
 
-origin_data_path: 'V:/XDU/contest/RM/Data_set/q/q0/'  # 存放json的文件夹的绝对路径
-train_path: 'V:/XDU/contest/RM/Data_set/2024-4-10_xigongdajiaoliusai/train/'  # 文件夹train的绝对路径
-test_path: 'V:/XDU/contest/RM/Data_set/2024-4-10_xigongdajiaoliusai/test/'  # 文件夹test的绝对路径
-val_path: 'V:/XDU/contest/RM/Data_set/2024-4-10_xigongdajiaoliusai/val/'
+origin_data_path: '/media/bozhi/Data/XDU/contest/RM/Data_set/2024-0.-26wanzhengxingtai/'  # 存放json的文件夹的绝对路径 注意：这里的路径末尾一定要加上/
+train_path: '/media/bozhi/Data/XDU/contest/RM/Data_set/temp/2/train/'  # 文件夹train的绝对路径
+test_path: '/media/bozhi/Data/XDU/contest/RM/Data_set/temp/2/test/'  # 文件夹test的绝对路径
+val_path: '/media/bozhi/Data/XDU/contest/RM/Data_set/temp/2/val/'
 school_name: "xidian" #学校名
 

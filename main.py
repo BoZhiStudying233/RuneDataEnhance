@@ -6,8 +6,8 @@ import random
 import numpy as np
 import sys
 
-# name2id = {'0': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5}
-name2id = {'0': 0}
+name2id = {'0': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5}
+#name2id = {'0': 0}
 name2img = ['origin', 'convert']
 name2mark = ['none', 'salt', 'gaussian', 'Blur', 'Brighter']
 type2path = ['train', 'test', 'val']
@@ -42,14 +42,16 @@ def CalFilePath(data_file):
 def decode_json(origin_data_path, txt_outer_path, whole_type, whole_name):
 
     print(whole_name)
-    if whole_type[0] == type2path[2]:
+    if whole_type[0] == type2path[2]:#如果是whole_type[0] == val
         txt_name = txt_outer_path + 'labels/' + whole_name[0] + '_' + whole_name[1] + '_' + whole_name[2] + '_' + whole_name[3] + '.txt'
     else:
         txt_name = txt_outer_path + whole_name[0] + '_' + whole_name[1] + '_' + whole_name[2] + '_' + whole_name[3] + '.txt'
-
+    print("txt_name:",txt_name)
     with open(txt_name, 'w') as f:
         json_name = whole_name[3] + ".json"
+        print("json_name:",json_name)
         json_path = os.path.join(origin_data_path, json_name)  # os路径融合
+        print("json_path:",json_path)
         data = json.load(open(json_path, 'r', encoding='gb2312', errors='ignore'))
         img_w = data['imageWidth']  # 图片的高
         img_h = data['imageHeight']  # 图片的宽
@@ -64,7 +66,7 @@ def decode_json(origin_data_path, txt_outer_path, whole_type, whole_name):
             if(label_name == 'dog'):
                 label_name = '0'
 
-            if whole_name[1] == name2img[1]:
+            if whole_name[1] == name2img[1]:#若为convert的（即红蓝通道转换的）
                 if int(label_name) > 2 :
                     label_name = str(int(label_name) - 3)
                 else :
@@ -103,6 +105,7 @@ def decode_json(origin_data_path, txt_outer_path, whole_type, whole_name):
             # 1.42,1.04为超参数;扩展w,h
             w = x_max - x_min
             h = y_max - y_min
+            
             if w < h : #小的边为宽
                 w *= 1.42
                 h *= 1.04
@@ -127,11 +130,18 @@ def decode_json(origin_data_path, txt_outer_path, whole_type, whole_name):
             # print("bb",bb)
             # print("data_points",data_points)
             # bbox_points = bb + data_points
+
             bbox_points = bb
+            for lk in range(len(i['points'])):
+                x1 = float(i['points'][lk][0]) / img_w
+                y1 = float(i['points'][lk][1]) / img_h
+                bbox_points.append(x1)
+                bbox_points.append(y1)
 
             try:
                 f.write(str(name2id[label_name]) + " " + " ".join([str(a) for a in bbox_points]) + '\n')
             except:
+                print("文件名为{}的,写入文件出错!!!".format((json_name)))
                 pass
 
 
@@ -229,20 +239,17 @@ if __name__ == '__main__':
         name = origin_data.split(".")[0]
         type = origin_data.split(".")[-1]
 
-        if type != 'json':  #设置了格式，
+        if type == 'json':  # 跳过json文件
             continue
 
-        #json文件与图片对应
-        img_type = 'png'
-
-
-        img = cv2.imread(data_file['origin_data_path'] + name + '.' + img_type)
-
+        img_type = type  # 图片类型
+        img = cv2.imread(data_file['origin_data_path'] + name + '.' + type)
+        print(str(data_file['origin_data_path'] + name + '.' + type))
         # 写原图
         #确定txt存储路径
-        txt_outer_path, path_type = CalFilePath(data_file)
+        txt_outer_path, path_type = CalFilePath(data_file)#确定当前图片要放到哪个文件夹，没有则创建    path_type: 按概率分配到train/test/val  txt_outer_path: dataFile里的路径
         whole_type = [path_type, img_type]
-        whole_name = [special_name, name2img[0], name2mark[0], name]
+        whole_name = [special_name, name2img[0], name2mark[0], name]#学校+自己所在路径  + 图片是不是转换的  + 图片是不是带噪声的  + 图片名字
         # print(whole_name)
         # print((whole_type))
         WriteData(data_file['origin_data_path'], txt_outer_path, whole_type, whole_name, img)
@@ -288,8 +295,9 @@ if __name__ == '__main__':
             WriteData(data_file['origin_data_path'], txt_outer_path, whole_type, whole_name, img_brighter)
             flagcount += 1
 
-        # 写转换后的图
-        if data_file['is_transform'] == 1:
+        # 写红蓝通道转换后的图
+        seed = random.random()
+        if seed < data_file['is_transform'] :
             img_b,img_g,img_r = cv2.split(img)
             convert_img = cv2.merge([img_r, img_g, img_b])
             #确定txt存储路径
@@ -299,45 +307,7 @@ if __name__ == '__main__':
             WriteData(data_file['origin_data_path'], txt_outer_path, whole_type, whole_name, convert_img)
             flagcount += 1
 
-            # 使图片产生椒盐噪声
-            seed = random.random()
-            if(seed < data_file['salt_rate']):
-                convert_img_salt = SaltAndPepper(convert_img)
-                txt_outer_path, path_type = CalFilePath(data_file)
-                whole_type = [path_type, img_type]
-                whole_name = (special_name, name2img[1], name2mark[1], name)
-                WriteData(data_file['origin_data_path'], txt_outer_path, whole_type, whole_name, convert_img_salt)
-                flagcount += 1
-
-            # 使图片产生高斯噪声
-            seed = random.random()
-            if(seed < data_file['gaussian_rate']):
-                convert_img_guassian = GaussianNoise(convert_img)
-                txt_outer_path, path_type = CalFilePath(data_file)
-                whole_type = [path_type, img_type]
-                whole_name = (special_name, name2img[1], name2mark[2], name)
-                WriteData(data_file['origin_data_path'], txt_outer_path, whole_type, whole_name, convert_img_guassian)
-                flagcount += 1
-
-            # 使图片产生高斯滤波
-            seed = random.random()
-            if(seed < data_file['gaussian_rate']):
-                convert_img_blur = Blur(convert_img)
-                txt_outer_path, path_type = CalFilePath(data_file)
-                whole_type = [path_type, img_type]
-                whole_name = (special_name, name2img[1], name2mark[3], name)
-                WriteData(data_file['origin_data_path'], txt_outer_path, whole_type, whole_name, convert_img_blur)
-                flagcount += 1
-
-            # 使图片增亮
-            seed = random.random()
-            if(seed < data_file['Brighter_rate']):
-                img_brighter = Brighter(convert_img)
-                txt_outer_path, path_type = CalFilePath(data_file)
-                whole_type = [path_type, img_type]
-                whole_name = (special_name, name2img[0], name2mark[4], name)
-                WriteData(data_file['origin_data_path'], txt_outer_path, whole_type, whole_name, img_brighter)
-                flagcount += 1
+            
 
         delay_json_num += 1
         print("转化完成文件：{}".format(delay_json_num))
