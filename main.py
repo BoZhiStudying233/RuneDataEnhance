@@ -52,6 +52,7 @@ def decode_json(origin_data_path, txt_outer_path, whole_type, whole_name):
         print("json_name:",json_name)
         json_path = os.path.join(origin_data_path, json_name)  # os路径融合
         print("json_path:",json_path)
+        print("\033[33m正在转换文件,请勿关闭程序...\033[0m")
         data = json.load(open(json_path, 'r', encoding='gb2312', errors='ignore'))
         img_w = data['imageWidth']  # 图片的高
         img_h = data['imageHeight']  # 图片的宽
@@ -342,6 +343,6 @@ if __name__ == '__main__':
     print("\033[32m转换完成!!!\033[0m")
     print("处理的图片数量：{}".format(solved_pic_num))
     print("未转化文件：{}".format(all_pic_num - solved_pic_num))
-    print("无有效json文件的图片的数量:{}".format(all_pic_num - flagcount))
+    print("无有效json文件的图片的数量:{}".format(all_pic_num - invalide_json_num))
     print("转化后目标总文件数量：{}".format((flagcount)))
     print("\n")
