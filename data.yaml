@@ -12,7 +12,7 @@ is_transform: 0 #进行红蓝通道转换
 
 # 图片名 = (scene_)学校名_所在最后一级文件_(convert_)方法_原图片名称.jpg/png
 
-origin_data_path: '/media/bozhi/Data/XDU/contest/RM/Data_set/2024-0.-26wanzhengxingtai/'  # 存放json的文件夹的绝对路径 注意：这里的路径末尾一定要加上/
+origin_data_path: '/media/bozhi/Data/XDU/contest/RM/Data_set/24-4_in_Shenzhen/my/'  # 存放json的文件夹的绝对路径 注意：这里的路径末尾一定要加上/
 train_path: '/media/bozhi/Data/XDU/contest/RM/Data_set/temp/2/train/'  # 文件夹train的绝对路径
 test_path: '/media/bozhi/Data/XDU/contest/RM/Data_set/temp/2/test/'  # 文件夹test的绝对路径
 val_path: '/media/bozhi/Data/XDU/contest/RM/Data_set/temp/2/val/'

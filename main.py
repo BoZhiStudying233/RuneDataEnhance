@@ -209,6 +209,14 @@ def SceneTranformation(image,roi, roi_rect, scene_img_path):
     scene[roi_rect.y: roi_rect.y+roi_rect.height, roi_rect.x:roi_rect.x+roi_rect.width] = roi
     return scene
 
+def check_json(json_file_path):
+    if os.path.exists(json_file_path) == False:#若该图片没有对应的json文件
+        return True
+    with open(json_file_path, 'r', encoding='gb2312', errors='ignore') as f:
+        data = json.load(f)
+        if not data.get('shapes', []):#若该json文件shape为空，即没有标注
+            return True
+
 if __name__ == '__main__':
     # 打开yaml文件
     with open('./data.yaml', 'r', encoding='utf8') as file:
@@ -216,7 +224,6 @@ if __name__ == '__main__':
     # print(data_file)
 
     origin_datas = os.listdir(data_file['origin_data_path'])
-    print("共有：{}个文件待转化".format(len(origin_datas) / 2))
     flagcount = 0
 
     special_name = data_file['school_name'] + "_" + data_file['origin_data_path'].split('/')[-2]#即学校名字+源数据集路径的上一个文件夹名
@@ -225,24 +232,40 @@ if __name__ == '__main__':
     last_name = 'null'
     last_type = 'png'
 
-    # 确定有多少待处理文件
-    delay_json_num = 0
-    all_json_num = 0
-    for origin_data in origin_datas:
+    # 记录图片对应的无效json文件数量
+    invalide_json_num = 0
+
+    #已转换处理完的图片数量
+    solved_pic_num = 0
+
+    for origin_data in origin_datas:#确定图片类型
         type = origin_data.split(".")[-1]
-        if (type == 'json'):
-            all_json_num += 1
+        if (type != 'json'):
+            break
 
-    print("有{}个文件待处理".format(all_json_num))
+    all_pic_num = 0
 
+    for origin_data in origin_datas:
+        file_type = origin_data.split(".")[-1]
+        if (file_type == type):
+            all_pic_num += 1
+
+    print("有{}个图片待处理".format(all_pic_num))
+    
     for origin_data in origin_datas:
         name = origin_data.split(".")[0]
         type = origin_data.split(".")[-1]
 
         if type == 'json':  # 跳过json文件
             continue
-
+         
         img_type = type  # 图片类型
+        json_file_path = data_file['origin_data_path'] + name + '.json'
+    
+        if check_json(json_file_path):#检查是否有对应有效json文件，若没有则跳过该图片
+            invalide_json_num += 1
+            continue
+
         img = cv2.imread(data_file['origin_data_path'] + name + '.' + type)
         print(str(data_file['origin_data_path'] + name + '.' + type))
         # 写原图
@@ -309,8 +332,16 @@ if __name__ == '__main__':
 
             
 
-        delay_json_num += 1
-        print("转化完成文件：{}".format(delay_json_num))
-        print("未转化文件：{}".format(all_json_num - delay_json_num))
+        solved_pic_num += 1
+        print("转化完成文件：{}".format(solved_pic_num))
+        print("未转化文件：{}".format(all_pic_num - solved_pic_num))
+        print("无有效json文件的图片的数量:{}".format(all_pic_num - flagcount))
         print("转化后目标总文件数量：{}".format((flagcount)))
         print("\n")
+
+    print("\033[32m转换完成!!!\033[0m")
+    print("处理的图片数量：{}".format(solved_pic_num))
+    print("未转化文件：{}".format(all_pic_num - solved_pic_num))
+    print("无有效json文件的图片的数量:{}".format(all_pic_num - flagcount))
+    print("转化后目标总文件数量：{}".format((flagcount)))
+    print("\n")
